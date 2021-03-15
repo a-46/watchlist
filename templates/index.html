@@ -1,31 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>{{user.name}}'s Watchlist'</title>
-    <link rel="icon" href="../static/1.png">
-    <link rel="stylesheet" href="../static/style.css" type="text/css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" 
-    integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-</head>
-<body class = "m-auto">
-    <h2 class="display-3">
-        <img alt="头像" class="头像" width="40" height="40" src="../static/images/pig.jpg">
+{% extends 'base.html' %}
 
-        {{user.name}}'s Watchlist</h2>
-    <p>{{ movies|length}} Titles</p>
-    <ul class="movie-list">
-        {% for movie in movies %}
-        <li>{{movie.title}} - {{movie.year}}</li>
-        {%endfor%}
-    
-    </ul>
-    <img alt="totoro" class="totoro" src="http://helloflask.com/totoro.gif">
-    <footer>
-        <small>&copy; 2018 <a href="http://helloflask.com/tutorial">HelloFlask</a>
-        </small>
-    </footer>
-</body>
+{% block content %}
+<p>{{ movies|length }} Titles</p>
+<ul class="movie-list">
+    {% for movie in movies %}
+    <li>{{ movie.title }} - {{ movie.year }}
+        <span class="float-right">
+            <a class="imdb" href="https://www.imdb.com/find?q={{ movie.title }}" target="_blank" title="Find this movie on IMDb">IMDb</a>
+        </span>
+    </li>
+    {% endfor %}
+</ul>
 
-</html>
+{% endblock %}
