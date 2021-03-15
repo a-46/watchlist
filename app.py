@@ -9,10 +9,18 @@ from flask_sqlalchemy import SQLAlchemy
 
 prefix = 'sqlite:///'
 
-
 fake= Faker()
 Faker.seed(0)
+
+
 app = Flask(__name__)
+
+
+
+
+
+
+
 
 @app.cli.command()  # 注册为命令
 @click.option('--drop', is_flag=True, help='Create after drop.')  # 设置选项
@@ -60,12 +68,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # 关闭对模型修改的
 db = SQLAlchemy(app)
 
 
-@app.route('/')
-def index():
-   
-    user = User.query.first()
-    movies = Movie.query.all()
-    return render_template('index.html', name=name, movies=movies)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -79,5 +81,18 @@ class Movie(db.Model):
 
 
 
+@app.route('/')
+def index():
+   
+    user = User.query.first()
+    movies = Movie.query.all()
+    return render_template('index.html', user=user, movies=movies)
+
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    user = User.query.first()
+    return render_template('404.html', user=user), 404
 
 
