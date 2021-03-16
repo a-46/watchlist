@@ -2,17 +2,17 @@ import os
 import sys
 import click
 
-from flask import Flask, render_template,request, url_for, redirect, flash
+from flask import Flask, render_template, request, url_for, redirect, flash
 from faker import Faker
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from flask_login import LoginManager, login_user, login_required, logout_user,current_user, UserMixin
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 
 prefix = 'sqlite:///'
 
 
-fake= Faker()
+fake = Faker()
 Faker.seed(0)
 
 
@@ -20,11 +20,6 @@ app = Flask(__name__)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 app.config['SECRET_KEY'] = 'dev'  # 等同于 app.secret_key = 'dev'
-
-
-
-
-
 
 
 @app.cli.command()  # 注册为命令
@@ -35,6 +30,7 @@ def initdb(drop):
         db.drop_all()
     db.create_all()
     click.echo('Initialized database.')  # 输出提示信息
+
 
 @app.cli.command()
 def forge():
@@ -52,10 +48,9 @@ def forge():
         {'title': 'WALL-E', 'year': '2008'},
         {'title': 'The Pork of Music', 'year': '2012'},
     ]
-    if len(movies)<20:
+    if len(movies) < 20:
         for _ in range(5):
-            movies.append({'title':fake.bs(), 'year':fake.year() })
-
+            movies.append({'title': fake.bs(), 'year': fake.year()})
 
     user = User(name=name)
     db.session.add(user)
@@ -65,38 +60,32 @@ def forge():
 
     db.session.commit()
     click.echo('Done.')
-    
 
-app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'data.db')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = prefix + \
+    os.path.join(app.root_path, 'data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # 关闭对模型修改的监控
 # 在扩展类实例化前加载配置
 db = SQLAlchemy(app)
 
 
-
 class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key = True)
-    name  = db.Column(db.String(20))
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20))
     username = db.Column(db.String(20))
     password_hash = db.Column(db.String(128))
-    
+
     def set_password(self, password):  # 用来设置密码的方法，接受密码作为参数
         self.password_hash = generate_password_hash(password)  # 将生成的密码保持到对应字段
 
     def validate_password(self, password):  # 用于验证密码的方法，接受密码作为参数
         return check_password_hash(self.password_hash, password)  # 返回布尔值
 
+
 class Movie(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
+    id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(60))
     year = db.Column(db.String(4))
-
-
-
-
-
-
-
 
 
 @app.context_processor
@@ -104,14 +93,14 @@ def inject_user():  # 函数名可以随意修改
     user = User.query.first()
     return dict(user=user)
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     user = User.query.first()
     return render_template('404.html'), 404
 
 
-    
-@app.route('/', methods=['GET','POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
         title = request.form.get('title')
@@ -122,14 +111,15 @@ def index():
         if not title or not year or len(year) > 4 or len(title) > 60:
             flash('Invalid input.')
             return redirect(url_for('index'))
-        movie=Movie(title = title, year= year)
+        movie = Movie(title=title, year=year)
         db.session.add(movie)
-        db,session.commit()
+        db, session.commit()
         flash('item created')
         return redirect(url_for('index'))
 
     movies = Movie.query.all()
     return render_template('index.html', movies=movies)
+
 
 @app.route('/movie/edit/<int:movie_id>', methods=['GET', 'POST'])
 @login_required
@@ -147,7 +137,7 @@ def edit(movie_id):
         movie.title = title  # 更新标题
         movie.year = year  # 更新年份
         db.session.commit()  # 提交数据库会话
-        
+
         flash('Item updated.')
         return redirect(url_for('index'))  # 重定向回主页
 
@@ -162,6 +152,7 @@ def delete(movie_id):
     db.session.commit()  # 提交数据库会话
     flash('Item deleted.')
     return redirect(url_for('index'))  # 重定向回主页
+
 
 @app.cli.command()
 @click.option('--username', prompt=True, help='The username used to login.')
@@ -183,8 +174,6 @@ def admin(username, password):
 
     db.session.commit()  # 提交数据库会话
     click.echo('Done.')
-
-
 
 
 @login_manager.user_loader
@@ -222,6 +211,7 @@ def logout():
     logout_user()  # 登出用户
     flash('Goodbye.')
     return redirect(url_for('index'))  # 重定向回首页
+
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
