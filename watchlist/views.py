@@ -82,6 +82,40 @@ def login():
     return render_template('login.html')
 
 
+
+
+@app.route('/signup', methods = ['GET','POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        if not username or not password or not confirm_password:
+            flash('Invalid input.')
+            return redirect(url_for('signup'))
+        if confirm_password != password:
+            flash('password not the same')
+            return redirect(url_for('signup'))
+
+        user = User.query.first()
+        if User.query.filter_by(name=username) is not None:
+            flash('user already exist')
+            return redirect(url_for('signup'))
+        else:
+            user = User(username=username, name='Admin')
+            user.set_password(password)  # 设置密码
+            db.session.add(user)
+
+        db.session.commit()  # 提交数据库会话
+
+        flash('Congrates! Signed up!')
+    return render_template('signup.html')
+
+
+
+
+
 @app.route('/logout')
 @login_required  # 用于视图保护，后面会详细介绍
 def logout():

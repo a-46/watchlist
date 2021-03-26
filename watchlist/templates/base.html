@@ -12,7 +12,7 @@
 <body>
 
     {% for message in get_flashed_messages() %}
-        <div class= "alert">{{ messahe}}</div>
+        <div class= "alert">{{ message}}</div>
     {% endfor %}
     <h2>
         <img alt="Avatar" class="avatar" height="40" width="40" src="{{ url_for('static', filename='images/pig.jpg') }}">
@@ -25,6 +25,7 @@
                 <li><a href="{{ url_for('settings') }}">Settings</a></li>
                 <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% else %}
+                <li><a href="{{url_for('signup')}}">Sign up</a> </li>
                 <li><a href="{{ url_for('login') }}">Login</a></li>
                 {% endif %}
             </li>
